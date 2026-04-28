@@ -114,14 +114,53 @@ public class ProductRepository implements IProductRepository {
         }
     }
 
+    /**
+     * Оновлює інформацію про товар.
+     */
     @Override
     public void update(Product product) {
+        String sql = """
+            UPDATE products
+            SET name = ?, price = ?, type = ?, quantity = ?
+            WHERE id = ?
+            """;
 
+        try (
+                Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setString(1, product.getName());
+            statement.setDouble(2, product.getPrice());
+            statement.setString(3, product.getType());
+            statement.setInt(4, product.getQuantity());
+            statement.setObject(5, product.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка при оновленні товару.", e);
+        }
     }
 
+    /**
+     * Видаляє товар за ідентифікатором.
+     */
     @Override
     public void deleteById(UUID id) {
+        String sql = """
+            DELETE FROM products
+            WHERE id = ?
+            """;
 
+        try (
+                Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setObject(1, id);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка при видаленні товару.", e);
+        }
     }
 
     @Override
