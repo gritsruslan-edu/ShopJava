@@ -163,13 +163,84 @@ public class ProductRepository implements IProductRepository {
         }
     }
 
+    /**
+     * Знаходить товар за ідентифікатором.
+     */
     @Override
     public Product findById(UUID id) {
+        String sql = """
+            SELECT id, name, price, type, quantity
+            FROM products
+            WHERE id = ?
+            """;
+
+        try (
+                Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setObject(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Product product = new Product(
+                            resultSet.getString("name"),
+                            resultSet.getDouble("price"),
+                            resultSet.getString("type"),
+                            resultSet.getInt("quantity")
+                    );
+
+                    product.setId(UUID.fromString(resultSet.getString("id")));
+
+                    return product;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка при пошуку товару за ідентифікатором.", e);
+        }
+
         return null;
     }
 
+    /**
+     * Шукає товари за назвою та типом.
+     */
     @Override
     public List<Product> searchByNameAndType(String name, String type) {
-        return List.of();
+        String sql = """
+            SELECT id, name, price, type, quantity
+            FROM products
+            WHERE LOWER(name) LIKE LOWER(?)
+              AND LOWER(type) LIKE LOWER(?)
+            ORDER BY name
+            """;
+
+        List<Product> products = new ArrayList<Product>();
+
+        try (
+                Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setString(1, "%" + name + "%");
+            statement.setString(2, "%" + type + "%");
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Product product = new Product(
+                            resultSet.getString("name"),
+                            resultSet.getDouble("price"),
+                            resultSet.getString("type"),
+                            resultSet.getInt("quantity")
+                    );
+
+                    product.setId(UUID.fromString(resultSet.getString("id")));
+
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка при пошуку товарів.", e);
+        }
+
+        return products;
     }
 }
