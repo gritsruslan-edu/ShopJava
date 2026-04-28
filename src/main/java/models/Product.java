@@ -31,6 +31,17 @@ public class Product {
     }
 
     /**
+     * Встановлює ідентифікатор товару.
+     */
+    public void setId(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Ідентифікатор товару не може бути пустим.");
+        }
+
+        this.id = id;
+    }
+
+    /**
      * Повертає назву товару.
      */
     public String getName() {

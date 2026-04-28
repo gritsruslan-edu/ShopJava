@@ -1,7 +1,8 @@
 ﻿package repository;
 
 import models.Product;
-
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -43,14 +44,74 @@ public class ProductRepository implements IProductRepository {
         }
     }
 
-    @Override
-    public List<Product> findAll() {
-        return List.of();
+    /**
+     * Створює підключення до бази даних.
+     */
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 
+    /**
+     * Повертає всі товари з бази даних.
+     */
+    @Override
+    public List<Product> findAll() {
+        String sql = """
+                SELECT id, name, price, type, quantity
+                FROM products
+                ORDER BY name
+                """;
+
+        List<Product> products = new ArrayList<Product>();
+
+        try (
+                Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery()
+        ) {
+            while (resultSet.next()) {
+                Product product = new Product(
+                        resultSet.getString("name"),
+                        resultSet.getDouble("price"),
+                        resultSet.getString("type"),
+                        resultSet.getInt("quantity")
+                );
+
+                product.setId(UUID.fromString(resultSet.getString("id")));
+
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка при отриманні списку товарів.", e);
+        }
+
+        return products;
+    }
+
+    /**
+     * Додає новий товар у базу даних.
+     */
     @Override
     public void add(Product product) {
+        String sql = """
+                INSERT INTO products (id, name, price, type, quantity)
+                VALUES (?, ?, ?, ?, ?)
+                """;
 
+        try (
+                Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setObject(1, product.getId());
+            statement.setString(2, product.getName());
+            statement.setDouble(3, product.getPrice());
+            statement.setString(4, product.getType());
+            statement.setInt(5, product.getQuantity());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка при додаванні товару.", e);
+        }
     }
 
     @Override
