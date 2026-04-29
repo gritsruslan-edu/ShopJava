@@ -1,6 +1,6 @@
 package repository;
 
-import models.Product;
+import model.Product;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
