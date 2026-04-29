@@ -1,4 +1,4 @@
-﻿public class Main {
+public class Main {
 
     /*
     * Вхідна точка у програму
