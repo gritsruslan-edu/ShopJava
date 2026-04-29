@@ -38,10 +38,10 @@ jobs:
           rm -rf docs
           mkdir -p docs
 
-          if [ -d "target/site/apidocs" ]; then
-            cp -r target/site/apidocs/* docs/
+          if [ -d "target/reports/apidocs" ]; then
+            cp -r target/reports/apidocs/* docs/
           else
-            echo "JavaDoc directory target/site/apidocs was not generated."
+            echo "JavaDoc directory target/reports/apidocs was not generated."
             echo "Existing target directories:"
             find target -maxdepth 4 -type d || true
             exit 1
