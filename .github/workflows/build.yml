@@ -37,7 +37,15 @@ jobs:
         run: |
           rm -rf docs
           mkdir -p docs
-          cp -r target/site/apidocs/* docs/
+
+          if [ -d "target/site/apidocs" ]; then
+            cp -r target/site/apidocs/* docs/
+          else
+            echo "JavaDoc directory target/site/apidocs was not generated."
+            echo "Existing target directories:"
+            find target -maxdepth 4 -type d || true
+            exit 1
+          fi
 
       - name: Commit generated documentation
         run: |
