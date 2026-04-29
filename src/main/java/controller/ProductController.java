@@ -119,6 +119,34 @@ public class ProductController {
     }
 
     /**
+     * Перевіряє, чи зараз використовується режим пошуку.
+     */
+    private boolean isSearchMode() {
+        String name = searchNameField.getText();
+        String type = searchTypeField.getText();
+
+        return (name != null && !name.trim().isEmpty())
+                || (type != null && !type.trim().isEmpty());
+    }
+
+    /**
+     * Оновлює таблицю з урахуванням поточного режиму.
+     */
+    private void refreshCurrentTableState() {
+        if (isSearchMode()) {
+            String name = searchNameField.getText();
+            String type = searchTypeField.getText();
+
+            List<Product> products = productRepository.searchByNameAndType(name, type);
+            ObservableList<Product> observableProducts = FXCollections.observableArrayList(products);
+
+            productsTable.setItems(observableProducts);
+        } else {
+            loadAllProducts();
+        }
+    }
+
+    /**
      * Відкриває вікно додавання товару.
      */
     @FXML
@@ -139,7 +167,7 @@ public class ProductController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            loadAllProducts();
+            refreshCurrentTableState();
         } catch (IOException e) {
             showError("Помилка відкриття вікна додавання товару.");
         }
@@ -174,7 +202,7 @@ public class ProductController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            loadAllProducts();
+            refreshCurrentTableState();
         } catch (IOException e) {
             showError("Помилка відкриття вікна оновлення товару.");
         }
@@ -194,7 +222,7 @@ public class ProductController {
 
         try {
             productRepository.deleteById(selectedProduct.getId());
-            loadAllProducts();
+            refreshCurrentTableState();
             showInfo("Товар успішно видалено.");
         } catch (RuntimeException e) {
             showError("Помилка при видаленні товару.");
