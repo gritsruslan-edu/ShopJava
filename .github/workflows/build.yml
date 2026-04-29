@@ -1,0 +1,52 @@
+name: Build, Test and Generate Docs
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Build project and run tests
+        run: mvn clean test
+
+      - name: Generate JavaDoc
+        run: mvn javadoc:javadoc
+
+      - name: Copy JavaDoc to docs directory
+        run: |
+          rm -rf docs
+          mkdir -p docs
+          cp -r target/site/apidocs/* docs/
+
+      - name: Commit generated documentation
+        run: |
+          if [ -n "$(git status --porcelain docs)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add docs
+            git commit -m "Update generated documentation [skip ci]"
+            git push
+          else
+            echo "No documentation changes to commit."
+          fi
