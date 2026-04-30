@@ -115,4 +115,27 @@ class ProductRepositoryTest {
         assertEquals("Молоко", products.get(0).getName());
         assertEquals("Ноутбук", products.get(1).getName());
     }
+
+    /**
+     * Перевіряє оновлення товару.
+     */
+    @Test
+    void shouldUpdateProduct() {
+        Product product = new Product("Ноутбук", 25000.0, "Електроніка", 5);
+        productRepository.add(product);
+
+        Product updatedProduct = new Product("Ігровий ноутбук", 32000.0, "Комп'ютери", 3);
+        updatedProduct.setId(product.getId());
+
+        productRepository.update(updatedProduct);
+
+        Product foundProduct = productRepository.findById(product.getId());
+
+        assertNotNull(foundProduct);
+        assertEquals(product.getId(), foundProduct.getId());
+        assertEquals("Ігровий ноутбук", foundProduct.getName());
+        assertEquals(32000.0, foundProduct.getPrice());
+        assertEquals("Комп'ютери", foundProduct.getType());
+        assertEquals(3, foundProduct.getQuantity());
+    }
 }
