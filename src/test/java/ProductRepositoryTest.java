@@ -1,4 +1,4 @@
-﻿import models.Product;
+import models.Product;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class ProductRepositoryTest {
 
     @Container
     private static final PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:16")
+            new PostgreSQLContainer<>("postgres:18")
                     .withDatabaseName("shop_test")
                     .withUsername("test")
                     .withPassword("test");
@@ -137,5 +137,40 @@ class ProductRepositoryTest {
         assertEquals(32000.0, foundProduct.getPrice());
         assertEquals("Комп'ютери", foundProduct.getType());
         assertEquals(3, foundProduct.getQuantity());
+    }
+
+    /**
+     * Перевіряє видалення товару за ідентифікатором.
+     */
+    @Test
+    void shouldDeleteProductById() {
+        Product product = new Product("Ноутбук", 25000.0, "Електроніка", 5);
+        productRepository.add(product);
+
+        productRepository.deleteById(product.getId());
+
+        Product foundProduct = productRepository.findById(product.getId());
+
+        assertNull(foundProduct);
+    }
+
+    /**
+     * Перевіряє пошук товарів за назвою та типом.
+     */
+    @Test
+    void shouldSearchProductsByNameAndType() {
+        Product firstProduct = new Product("Ноутбук Lenovo", 25000.0, "Електроніка", 5);
+        Product secondProduct = new Product("Ноутбук Asus", 28000.0, "Електроніка", 4);
+        Product thirdProduct = new Product("Молоко", 45.0, "Продукти", 20);
+
+        productRepository.add(firstProduct);
+        productRepository.add(secondProduct);
+        productRepository.add(thirdProduct);
+
+        List<Product> products = productRepository.searchByNameAndType("ноутбук", "електроніка");
+
+        assertEquals(2, products.size());
+        assertEquals("Ноутбук Asus", products.get(0).getName());
+        assertEquals("Ноутбук Lenovo", products.get(1).getName());
     }
 }
