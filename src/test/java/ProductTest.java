@@ -1,4 +1,4 @@
-import models.Product;
+import model.Product;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
