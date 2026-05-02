@@ -1,6 +1,6 @@
 package repository;
 
-import models.Product;
+import model.Product;
 
 import java.util.List;
 import java.util.UUID;
