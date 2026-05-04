@@ -47,7 +47,7 @@ public class ProductApp extends Application {
         ProductController controller = loader.getController();
         controller.setProductRepository(productRepository);
 
-        stage.setTitle("Products");
+        stage.setTitle("ShopJava");
         stage.setScene(scene);
         stage.show();
     }
